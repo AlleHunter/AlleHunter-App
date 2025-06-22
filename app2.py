@@ -168,7 +168,7 @@ with st.expander("Jak przygotować dane i używać AlleHunter?"):
         Aby **AlleHunter** mógł poprawnie przeanalizować Twoje dane i wskazać potencjalnie nieprawidłowe opłaty za podjazdy DPD,
         przygotuj i załaduj dwa rodzaje plików CSV:
 
-        **1. Pliki z wysyłkami (Zestawienie dostaw) - Jeśli masz więcej niż jedno, **KONIECZNIE** ze wszystkich swoich kont sprzedażowych Allegro:**
+        **1. Pliki z wysyłkami (Zestawienie dostaw) - Jeśli masz więcej niż jedno konto Allegro, *KONIECZNIE* ze wszystkich swoich kont sprzedażowych Allegro:**
         
         * Pobierz 'Zestawienie dostaw' z Panelu Allegro (SalesCenter > Zamówienia i zwroty > Zamówione przesyłki).
         
@@ -185,7 +185,9 @@ with st.expander("Jak przygotować dane i używać AlleHunter?"):
         * W Panelu możesz pobrać zestawienie z ostatniego roku i taki zakres polecamy dla efektywnej analizy.
         
         * Załaduj pliki - Możesz załadować dowolną liczbę plików, z dowolnej liczby kont sprzedażowych. **PAMIĘTAJ!** - jeśli prowdzisz sprzedaż na wielu kontach Allegro, to MUSISZ załączyć WSZYSTKIE pliki ze WSZYSTKICH kont - **Jest to absolutnie konieczne dla poprawności wyników raportu!** **2. Pliki z opłatami (Zestawienie opłat) - Jeśli masz więcej niż jedno, **KONIECZNIE** ze wszystkich swoich kont sprzedażowych Allegro:**
-        
+
+
+        **2. Pliki z opłatami (Zestawienie opłat) - Jeśli masz więcej niż jedno konto Allegro, *KONIECZNIE* ze wszystkich swoich kont sprzedażowych Allegro:**
         * Pobierz 'Zestawienie opłat' z Panelu Allegro (SalesCenter > Finanse > Rozliczenia z Allegro).
         
         * W sekcji "Za okres" ustaw "wybierz". Następnie ustaw datę w zakresie, która Cię interesuje (polecamy ostatni rok)
