@@ -145,7 +145,7 @@ with col_logo:
 with col_counter:
     st.markdown("<div style='margin-top: 90px;'>", unsafe_allow_html=True)
     global_count = get_global_dpd_errors_count(db_connection)
-    st.markdown(f"<p style='text-align: center; font-size: 1.1em;'>TYLE opłat Allegro DPD wykrył dotąd AlleHunter</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center; font-size: 1.1em;'>TYLE niesłuszynych opłat Allegro DPD wykrył dotąd AlleHunter</p>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align: center; margin-top: -15px;'>{global_count}</h2>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
