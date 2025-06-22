@@ -203,7 +203,7 @@ with st.expander("Jak przygotować dane i używać AlleHunter?"):
         1.  Załaduj swoje pliki z wysyłkami w sekcji "Tutaj załaduj wszystkie swoje pliki z wysyłkami". **Pamiętaj** aby wgrać każdy plik tylko raz.
         2.  Załaduj swoje pliki z opłatami w sekcji "Tutaj załaduj wszystkie swoje pliki z opłatami". **Pamiętaj** aby wgrać każdy plik tylko raz.
         3.  Kliknij przycisk "Analizuj opłaty DPD".
-        4.  Poczekaj na przetworzenie danych. Wyniki zostaną wyświetlone poniżej. Aplikacja ma wbudowaną przeglądarkę plików csv dzięki, której możesz przeszukiwać plik wynikowy, a także przeglądać go natychmiast po wygenerowaniu.
+        4.  Poczekaj na przetworzenie danych. Wyniki zostaną wyświetlone poniżej. Aplikacja ma wbudowaną przeglądarkę plików csv, dzięki której możesz przeszukiwać plik wynikowy, a także przeglądać go natychmiast po wygenerowaniu.
         5.  Na koniec możesz pobrać wyniki w formacie CSV.
         """,
         unsafe_allow_html=True
