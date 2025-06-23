@@ -1,5 +1,6 @@
 # AlleHunter-App
 Aplikacja Streamlit do analizy słuszoności naliczenia opłat za podjazdy DPD Allegro
+
 Aplikacja jest ZUPEŁNIE DARMOWYM narzędziem analitycznym, powstałym, aby umożliwić Sprzedającym na portalu Allegro szybkie sprawdzenie poprawności naliczonych przez serwis opłat z tytułu podjazdów kurierskich DPD.
 Stanowi odpowiedź na przeszkody stawiane przed Sprzedającymi w zakresie sprawdzania udostępnianych im zestawień i raportów, wyrównuje szanse w zakresie analizy danych i eliminuje konieczność wielotygodniowego,
 ręcznego rozpisywania i zestawiania tysięcy rekordów.
