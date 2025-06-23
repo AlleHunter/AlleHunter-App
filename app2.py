@@ -217,7 +217,9 @@ with st.expander("Jak przygotować dane i używać AlleHunter?"):
         
         * Dla wygody wszystkie pliki z zestawieniami opłat zapisz w jednym folderze (ułatwi to ich masowe ładowanie do aplikacji)
         
-        * Załaduj pliki - Możesz załadować dowolną liczbę plików, z dowolnej liczby kont sprzedażowych. **PAMIĘTAJ!** - jeśli prowdzisz sprzedaż na wielu kontach Allegro, to MUSISZ załączyć WSZYSTKIE pliki ze WSZYSTKICH kont - **Jest to absolutnie konieczne dla poprawności wyników raportu!** ### **Instrukcja użytkowania:**
+        * Załaduj pliki - Możesz załadować dowolną liczbę plików, z dowolnej liczby kont sprzedażowych. **PAMIĘTAJ!** - jeśli prowdzisz sprzedaż na wielu kontach Allegro, to MUSISZ załączyć WSZYSTKIE pliki ze WSZYSTKICH kont - **Jest to absolutnie konieczne dla poprawności wyników raportu!** 
+        
+        ### **Instrukcja użytkowania:**
         1.  Załaduj swoje pliki z wysyłkami w sekcji "Tutaj załaduj wszystkie swoje pliki z wysyłkami". **Pamiętaj** aby wgrać każdy plik tylko raz.
         2.  Załaduj swoje pliki z opłatami w sekcji "Tutaj załaduj wszystkie swoje pliki z opłatami". **Pamiętaj** aby wgrać każdy plik tylko raz.
         3.  Kliknij przycisk "Analizuj opłaty DPD".
