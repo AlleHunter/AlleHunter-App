@@ -199,7 +199,7 @@ with st.expander("Jak przygotować dane i używać AlleHunter?"):
         
         * Wybierz filtry: Data zakupu, Data utworzenia przesyłki, Metoda dostawy, Przewoźnik, Numer przesyłki, Numer zamówienia, Login, Rodzaj przesyłki, Wymiary, Waga, Kwota pobrania, Usługi dodatkowe, Numer zlecenia podjazdu, USTAW FORMAT PLIKU NA CSV!.
         
-        * Klinij "POBIERZ PLIK". Aby pobrać kolejne fragmety zestawienia, musisz przejść na kolejną stronę i powtórzyć ostatnie kroki (Na momet pisania aplikacji Allegro nie umożliwa pobrania więcej niż 100 rekordów na raz)
+        * Kliknij "POBIERZ PLIK". Aby pobrać kolejne fragmety zestawienia, musisz przejść na kolejną stronę i powtórzyć ostatnie kroki (Na momet pisania aplikacji Allegro nie umożliwa pobrania więcej niż 100 rekordów na raz)
         
         * Dla wygody wszystkie pliki z zestawieniami dostaw zapisz w jednym folderze (ułatwi to ich masowe ładowanie do aplikacji)
         
