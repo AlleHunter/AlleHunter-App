@@ -1,6 +1,3 @@
-# In[ ]:
-
-
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -19,17 +16,15 @@ st.set_page_config(
 )
 
 
-# Niestandardowe style CSS dla przycisku pobierania
+# Niestandardowe style CSS
 st.markdown(
     """
     <style>
-    /* Stylowanie wyrównania pionowego dla kolumn - istniejące */
     .st-emotion-cache-nahz7x {
         display: flex;
         align-items: center;
     }
 
-    /* Klasa dla niestandardowego przycisku pobierani */
     .stDownloadButton > button {
         background-color: #4CAF50;
         color: white;
@@ -49,8 +44,7 @@ st.markdown(
         background-color: #3e8e41;
     }
 
-    /* Klasa dla przycisku "Analizuj opłaty DPD" */
-    div.stButton > button {
+    div.stButton button[data-testid*="stButton-primary"] {
         background-color: #dc3545;
         color: white;
         padding: 10px 20px;
@@ -61,24 +55,24 @@ st.markdown(
         transition: background-color 0.3s ease;
     }
 
-    div.stButton > button:hover {
+    div.stButton button[data-testid*="stButton-primary"]:hover {
         background-color: #c82333;
     }
 
-    div.stButton > button:active {
+    div.stButton button[data-testid*="stButton-primary"]:active {
         background-color: #bd2130;
     }
 
     .download-button-container {
         margin-top: 20px;
     }
+
     </style>
     """,
     unsafe_allow_html=True
 )
 
 # Funkcja do nawiązywania połączenia z MySQL
-@st.cache_resource(ttl=3600)
 def get_mysql_connection():
     cfg = st.secrets["connections"]["mysql"]
     try:
@@ -88,18 +82,37 @@ def get_mysql_connection():
             user=cfg["username"],
             password=cfg["password"],
             database=cfg["database"],
-            connect_timeout=10
+            connect_timeout=10,
+            read_timeout=10, # Dodanie read_timeout
+            write_timeout=10 # Dodanie write_timeout
         )
         return conn
     except pymysql.MySQLError as err:
-        st.error(f"Błąd MySQL: {err}")
+        st.error(f"Błąd MySQL: {err}. Spróbuj odświeżyć stronę lub skontaktuj się z administratorem.")
         return None
     except Exception as e:
-        st.error(f"Nieoczekiwany błąd połączenia: {e}")
+        st.error(f"Nieoczekiwany błąd połączenia: {e}. Spróbuj odświeżyć stronę lub skontaktuj się z administratorem.")
         return None
 
+# Funkcja testująca połączenie i próbująca je odnowić
+def get_active_db_connection():
+    # Sprawdzamy, czy połączenie już istnieje w sesji i jest aktywne
+    if 'db_connection' not in st.session_state or st.session_state.db_connection is None:
+        st.session_state.db_connection = get_mysql_connection()
+    else:
+        try:
+            # Ping, aby sprawdzić, czy połączenie jest nadal aktywne
+            st.session_state.db_connection.ping(reconnect=True)
+        except pymysql.Error:
+            # Jeśli ping się nie powiedzie, próbujemy nawiązać nowe połączenie
+            st.session_state.db_connection = get_mysql_connection()
+    return st.session_state.db_connection
+
+
 # Funkcje globalnego licznika
-def get_global_dpd_errors_count(conn):
+@st.cache_data(ttl=600) # Cache'ujemy dane na 10 minut (600 sekund)
+def get_global_dpd_errors_count_cached():
+    conn = get_active_db_connection()
     if conn is None:
         return 0
     try:
@@ -111,6 +124,7 @@ def get_global_dpd_errors_count(conn):
             if result:
                 return result[0]
             else:
+                # Inicjalizujemy licznik, jeśli nie istnieje
                 cursor.execute(
                     "INSERT IGNORE INTO global_counter (counter_name, count) VALUES ('dpd_errors_total', 0)"
                 )
@@ -119,9 +133,12 @@ def get_global_dpd_errors_count(conn):
     except pymysql.MySQLError as err:
         st.warning(f"Błąd podczas pobierania globalnego licznika: {err}")
         return 0
+    finally:
+        pass
 
 
-def update_global_dpd_errors_count(conn, increment_by):
+def update_global_dpd_errors_count(increment_by):
+    conn = get_active_db_connection() # Używamy funkcji testującej połączenie
     if conn is None:
         return
     try:
@@ -131,12 +148,12 @@ def update_global_dpd_errors_count(conn, increment_by):
                 (increment_by,)
             )
             conn.commit()
+        # Ważne: Po aktualizacji danych w bazie, czyścimy cache, aby wymusić odczyt nowych danych
+        get_global_dpd_errors_count_cached.clear()
     except pymysql.MySQLError as err:
         st.error(f"Błąd podczas aktualizacji globalnego licznika: {err}")
 
-# Połączenie z bazą i nagłówek aplikacji
-db_connection = get_mysql_connection()
-
+# Kolumny
 col_logo, col_counter = st.columns([3, 2])
 
 with col_logo:
@@ -144,11 +161,15 @@ with col_logo:
 
 with col_counter:
     st.markdown("<div style='margin-top: 90px;'>", unsafe_allow_html=True)
-    global_count = get_global_dpd_errors_count(db_connection)
-    st.markdown(f"<p style='text-align: center; font-size: 1.1em;'>TYLE niesłuszynych opłat Allegro DPD wykrył dotąd AlleHunter</p>", unsafe_allow_html=True)
+    
+    # Pobieramy licznik z funkcji cachującej
+    global_count = get_global_dpd_errors_count_cached() 
+    st.markdown(f"<p style='text-align: center; font-size: 1.1em;'>TYLE niesłusznych opłat Allegro DPD wykrył dotąd AlleHunter</p>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align: center; margin-top: -15px;'>{global_count}</h2>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+    if st.button("Odśwież licznik", key="refresh_counter_button", help="Kliknij, aby odświeżyć globalny licznik wykrytych opłat"):
+        get_global_dpd_errors_count_cached.clear()
 
 # Sekcja: Opis / Instrukcja
 with st.expander("Jak przygotować dane i używać AlleHunter?"):
@@ -192,14 +213,11 @@ with st.expander("Jak przygotować dane i używać AlleHunter?"):
         
         * W sekcji "Za okres" ustaw "wybierz". Następnie ustaw datę w zakresie, która Cię interesuje (polecamy ostatni rok)
         
-        * Kliknij "WYGENERUJ ZESTAWIENIE" i poczekaj aż Allegro prześle je do Ciebie na e-mail.
+        * Kliknij "WYGENERUJ ZESTAWIENIE" i poczekaj aż Allegro prześlesze je do Ciebie na e-mail.
         
         * Dla wygody wszystkie pliki z zestawieniami opłat zapisz w jednym folderze (ułatwi to ich masowe ładowanie do aplikacji)
         
-        * Załaduj pliki - Możesz załadować dowolną liczbę plików, z dowolnej liczby kont sprzedażowych. **PAMIĘTAJ!** - jeśli prowdzisz sprzedaż na wielu kontach Allegro, to MUSISZ załączyć WSZYSTKIE pliki ze WSZYSTKICH kont - **Jest to absolutnie konieczne dla poprawności wyników raportu!** 
-
-
-        ### **Instrukcja użytkowania:**
+        * Załaduj pliki - Możesz załadować dowolną liczbę plików, z dowolnej liczby kont sprzedażowych. **PAMIĘTAJ!** - jeśli prowdzisz sprzedaż na wielu kontach Allegro, to MUSISZ załączyć WSZYSTKIE pliki ze WSZYSTKICH kont - **Jest to absolutnie konieczne dla poprawności wyników raportu!** ### **Instrukcja użytkowania:**
         1.  Załaduj swoje pliki z wysyłkami w sekcji "Tutaj załaduj wszystkie swoje pliki z wysyłkami". **Pamiętaj** aby wgrać każdy plik tylko raz.
         2.  Załaduj swoje pliki z opłatami w sekcji "Tutaj załaduj wszystkie swoje pliki z opłatami". **Pamiętaj** aby wgrać każdy plik tylko raz.
         3.  Kliknij przycisk "Analizuj opłaty DPD".
@@ -267,11 +285,11 @@ with st.expander("Schemat klasyfikowania opłat"):
 with st.expander("Bezpieczeństwo Twoich danych"):
     st.markdown(
         """
-        ### Bezpieczeństwo Twoich danych 
+        ### Bezpieczeństwo Twoich danych  
         
         Wszystkie przesyłane przez Ciebie pliki są przetwarzane przez AlleHunter **wyłącznie w Twojej przeglądarce** i **nie są nigdzie zapisywane ani przesyłane na żadne serwery zewnętrzne**.
         Aplikacja działa lokalnie, a po zamknięciu strony wszystkie dane, które zostały załadowane, zostają usunięte z pamięci.
-        Jedyną informacją przechowywaną w zewnętrznej bazie danych jest **globalna, anonimowa liczba wykrytych błędnych opłat naliczonych przez Allegro**, która służy jedynie do celów statystycznych i nie jest w żaden sposób powiązana z Twoimi danymi. 
+        Jedyną informacją przechowywaną w zewnętrznej bazie danych jest **globalna, anonimowa liczba wykrytych błędnych opłat naliczonych przez Allegro**, która służy jedynie do celów statystycznych i nie jest w żaden sposób powiązana z Twoimi danymi.  
 
         **Jeśli masz jakieś pytania, znalazłeś błąd lub masz sugestię dotyczącą aplikacji --> allehunter@tutamail.com**
         """,
@@ -296,7 +314,6 @@ uploaded_operations_files = st.file_uploader(
 
 df_results = pd.DataFrame()
 
-# Zastosowany selektor CSS dla przycisku "Analizuj opłaty DPD"
 if st.button("Analizuj opłaty DPD"):
     if not uploaded_shipments_files:
         st.error("Proszę załadować pliki z wysyłkami.")
@@ -318,7 +335,7 @@ if st.button("Analizuj opłaty DPD"):
                 if file.name in processed_shipment_file_names:
                     st.warning(f"Plik wysyłki '{file.name}' został już załadowany.")
                     load_aborted = True
-                    continue # Pomijamy ten plik, ale kontynuujemy sprawdzanie pozostałych
+                    continue
                 processed_shipment_file_names.add(file.name)
                 try:
                     df = pd.read_csv(file, encoding='utf-8')
@@ -327,20 +344,19 @@ if st.button("Analizuj opłaty DPD"):
                     df = pd.read_csv(file, encoding='latin1')
                     shipments_dfs.append(df)
                 except Exception as e:
-                    # Sprawdzamy, czy błąd zawiera frazę wskazującą na problem z formatem CSV
                     if "Error tokenizing data" in str(e) or ("Expected" in str(e) and "fields" in str(e) and "saw" in str(e)):
                         st.error(f"Prawdopodobny błąd w pliku wysyłki '{file.name}'. Upewnij się, że załadowano pliki do odpowiednich sekcji (pliki wysyłek tutaj, pliki opłat w drugiej sekcji).")
                     else:
                         st.error(f"Wystąpił błąd podczas wczytywania pliku wysyłki '{file.name}': {e}")
                     load_aborted = True
-                    continue # Pomijamy ten plik, ale kontynuujemy sprawdzanie pozostałych
+                    continue
 
             # Wczytywanie plików opłat z kontrolą duplikatów
             for file in uploaded_operations_files:
                 if file.name in processed_operation_file_names:
                     st.warning(f"Plik opłat '{file.name}' został już załadowany.")
                     load_aborted = True
-                    continue # Pomijamy ten plik, ale kontynuujemy sprawdzanie pozostałych
+                    continue
                 processed_operation_file_names.add(file.name)
                 try:
                     df = pd.read_csv(file, encoding='utf-8', sep=';', decimal=',')
@@ -355,7 +371,7 @@ if st.button("Analizuj opłaty DPD"):
                     else:
                         st.error(f"Wystąpił błąd podczas wczytywania pliku opłat '{file.name}': {e}")
                     load_aborted = True
-                    continue # Pomijamy ten plik, ale kontynuujemy sprawdzanie pozostałych
+                    continue
 
             # Kontynuujemy przetwarzanie tylko jeśli nie było żadnych problemów z ładowaniem (duplikaty, błędy)
             if load_aborted:
@@ -384,9 +400,7 @@ if st.button("Analizuj opłaty DPD"):
                     else:
                         st.success(f"Znaleziono {len(df_results)} podejrzanych opłat DPD!")
                         # Aktualizujemy globalny licznik
-                        if db_connection:
-                            update_global_dpd_errors_count(db_connection, len(df_results))
-                            st.info("🔄 Odśwież stronę (F5), aby zobaczyć zaktualizowany licznik.")
+                        update_global_dpd_errors_count(len(df_results)) 
 
 # Sekcja wyświetlania wyników i pobierania pliku
 if not df_results.empty:
